@@ -1,6 +1,7 @@
-package config
+package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/go-yaml/yaml"
 	"os"
@@ -8,17 +9,22 @@ import (
 	"strconv"
 )
 
-var configData map[string]map[string]string
-var re *regexp.Regexp
+// Local settings from config/{environment}.yaml
 var Local Environment
+
+// Global settings from config/global.yaml
 var Global Environment
 
 type Environment struct {
 	Name string
 }
 
+// [environment][setting][value]
+var configData map[string]map[string]interface{}
+var re *regexp.Regexp
+
 func init() {
-	configData = make(map[string]map[string]string)
+	configData = make(map[string]map[string]interface{})
 	re = regexp.MustCompile("^\\s*([\\w-]*)\\s*:\\s*(.*)\\s*")
 	Global.Name = "global"
 	if len(os.Args) > 1 {
@@ -28,53 +34,78 @@ func init() {
 	}
 }
 
-// Return current environment,  dev is default
+// GetEnv Return current environment, dev is default
 func GetEnv() string {
 	return Local.Name
 }
 
-func (e Environment) Get(setting string) string {
+// Get setting as string
+func (e Environment) Get(setting string) (result string) {
 	environmentMap := fetchenvironment(e)
 	val, _ := environmentMap[setting]
-	return val
+
+	parse(val, &result)
+	return
 }
 
+// GetUint get setting as uint64
 func (e Environment) GetUint(setting string) uint64 {
+	var strVal string
+
 	environmentMap := fetchenvironment(e)
 	val, _ := environmentMap[setting]
-	parsedVal, _ := strconv.ParseUint(val, 10, 64)
+	parse(val, &strVal)
+
+	parsedVal, _ := strconv.ParseUint(strVal, 10, 64)
 	return parsedVal
 }
 
+// GetInt get setting as int64
 func (e Environment) GetInt(setting string) int64 {
+	var strVal string
+
 	environmentMap := fetchenvironment(e)
 	val, _ := environmentMap[setting]
-	parsedVal, _ := strconv.ParseInt(val, 10, 64)
+	parse(val, &strVal)
+
+	parsedVal, _ := strconv.ParseInt(strVal, 10, 64)
 	return parsedVal
 }
 
+// GetFloat get setting as float64
 func (e Environment) GetFloat(setting string) float64 {
+	var strVal string
+
 	environmentMap := fetchenvironment(e)
 	val, _ := environmentMap[setting]
-	parsedVal, _ := strconv.ParseFloat(val, 64)
+	parse(val, &strVal)
+
+	parsedVal, _ := strconv.ParseFloat(strVal, 64)
 	return parsedVal
 }
 
+// GetBool get setting as boolean
 func (e Environment) GetBool(setting string) bool {
+	var strVal string
+
 	environmentMap := fetchenvironment(e)
 	val, _ := environmentMap[setting]
-	parsedVal, _ := strconv.ParseBool(val)
+	parse(val, &strVal)
+
+	parsedVal, _ := strconv.ParseBool(strVal)
 	return parsedVal
 }
 
-//func (e Environment) GetSlice(setting string) []string {
-//	environmentMap := fetchenvironment(e)
-//	val, _ := environmentMap[setting]
-//	parsedVal, _ := strconv.P(val)
-//	return parsedVal
-//}
+// GetSlice get setting as slice of strings
+func (e Environment) GetSlice(setting string) (result []string) {
+	environmentMap := fetchenvironment(e)
+	val, _ := environmentMap[setting]
 
-func fetchenvironment(e Environment) map[string]string {
+	parse(val, &result)
+	return
+}
+
+func fetchenvironment(e Environment) map[string]interface{} {
 	environmentMap, ok := configData[e.Name]
 	// singleton
 	if !ok {
@@ -85,15 +116,21 @@ func fetchenvironment(e Environment) map[string]string {
 }
 
 func importSettingsFromFile(environment string) {
-	configData[environment] = make(map[string]string)
-	file, err := os.ReadFile("config/" + environment + ".yml")
+	config := make(map[string]interface{})
+	file, err := os.ReadFile("config/" + environment + ".yaml")
 	if err != nil {
-		panic("Open config file fail: config/" + environment + ".yml. Please run application as ./app [dev] ")
+		panic(fmt.Sprintf("Open config file fail: config/%s.yaml. Please run application as ./app [dev] ", environment))
 		return
 	}
-	err = yaml.Unmarshal(file, &configData)
+	err = yaml.Unmarshal(file, &config)
 	if err != nil {
-		panic(fmt.Sprintf("Parse config file fail: config/"+environment+".yml %s", err.Error()))
+		panic(fmt.Sprintf("Parse config file fail: config/%s.yaml %s", environment, err.Error()))
 		return
 	}
+	configData[environment] = config
+}
+
+func parse(in interface{}, out interface{}) {
+	bytes, _ := json.Marshal(in)
+	_ = json.Unmarshal(bytes, &out)
 }
