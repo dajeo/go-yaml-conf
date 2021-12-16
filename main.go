@@ -50,26 +50,24 @@ func (e Environment) Get(setting string) (result string) {
 
 // GetUint get setting as uint64
 func (e Environment) GetUint(setting string) uint64 {
-	var strVal string
+	var result uint64
 
 	environmentMap := fetchenvironment(e)
 	val, _ := environmentMap[setting]
-	parse(val, &strVal)
+	parse(val, &result)
 
-	parsedVal, _ := strconv.ParseUint(strVal, 10, 64)
-	return parsedVal
+	return result
 }
 
 // GetInt get setting as int64
 func (e Environment) GetInt(setting string) int64 {
-	var strVal string
+	var result int64
 
 	environmentMap := fetchenvironment(e)
 	val, _ := environmentMap[setting]
-	parse(val, &strVal)
+	parse(val, &result)
 
-	parsedVal, _ := strconv.ParseInt(strVal, 10, 64)
-	return parsedVal
+	return result
 }
 
 // GetFloat get setting as float64
