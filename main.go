@@ -2,6 +2,7 @@ package conf
 
 import (
 	"encoding/json"
+	"flag"
 	"fmt"
 	"github.com/go-yaml/yaml"
 	"os"
@@ -27,8 +28,9 @@ func init() {
 	configData = make(map[string]map[string]interface{})
 	re = regexp.MustCompile("^\\s*([\\w-]*)\\s*:\\s*(.*)\\s*")
 	Global.Name = "global"
+	flag.Parse()
 	if len(os.Args) > 1 {
-		Local.Name = os.Args[1]
+		Local.Name = flag.Arg(1)
 	} else {
 		panic("Please run app with environment -> ./app environment")
 	}
