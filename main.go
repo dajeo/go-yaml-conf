@@ -10,6 +10,8 @@ import (
 	"strconv"
 )
 
+var Env = flag.String("env", "local", "Please run app with environment -> ./app -env environment")
+
 // Local settings from config/{environment}.yaml
 var Local Environment
 
@@ -29,7 +31,7 @@ func init() {
 	re = regexp.MustCompile("^\\s*([\\w-]*)\\s*:\\s*(.*)\\s*")
 	Global.Name = "global"
 	if len(os.Args) > 1 {
-		Local.Name = *flag.String("env", "local", "Please run app with environment -> ./app -env environment")
+		Local.Name = *Env
 	} else {
 		panic("Please run app with environment -> ./app -env environment")
 	}
