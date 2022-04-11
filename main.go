@@ -11,6 +11,7 @@ import (
 )
 
 var Env = flag.String("env", "local", "Please run app with environment -> ./app -env environment")
+var global = "global"
 
 // Local settings from config/{environment}.yaml
 var Local Environment
@@ -29,7 +30,8 @@ var re *regexp.Regexp
 func init() {
 	configData = make(map[string]map[string]interface{})
 	re = regexp.MustCompile("^\\s*([\\w-]*)\\s*:\\s*(.*)\\s*")
-	*Global.Name = "global"
+	Global.Name = &global
+
 	if len(os.Args) > 1 {
 		Local.Name = Env
 	} else {
