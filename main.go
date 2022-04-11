@@ -30,9 +30,9 @@ func init() {
 	Global.Name = "global"
 	flag.Parse()
 	if len(os.Args) > 1 {
-		Local.Name = flag.Arg(1)
+		Local.Name = *flag.String("env", "local", "Please run app with environment -> ./app -env environment")
 	} else {
-		panic("Please run app with environment -> ./app environment")
+		panic("Please run app with environment -> ./app -env environment")
 	}
 }
 
