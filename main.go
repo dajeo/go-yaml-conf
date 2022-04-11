@@ -24,11 +24,11 @@ type Environment struct {
 }
 
 // [environment][setting][value]
-var configData map[string]map[string]interface{}
+var configData map[*string]map[string]interface{}
 var re *regexp.Regexp
 
 func init() {
-	configData = make(map[string]map[string]interface{})
+	configData = make(map[*string]map[string]interface{})
 	re = regexp.MustCompile("^\\s*([\\w-]*)\\s*:\\s*(.*)\\s*")
 	Global.Name = &global
 
@@ -109,28 +109,29 @@ func (e Environment) GetSlice(setting string) (result []string) {
 }
 
 func fetchenvironment(e Environment) map[string]interface{} {
-	environmentMap, ok := configData[*e.Name]
+	environmentMap, ok := configData[e.Name]
 	// singleton
 	if !ok {
-		importSettingsFromFile(*e.Name)
-		environmentMap, _ = configData[*e.Name]
+		e.importSettingsFromFile()
+		environmentMap, _ = configData[e.Name]
 	}
 	return environmentMap
 }
 
-func importSettingsFromFile(environment string) {
+func (e Environment) importSettingsFromFile() {
 	config := make(map[string]interface{})
-	file, err := os.ReadFile("config/" + environment + ".yaml")
+	name := *e.Name
+	file, err := os.ReadFile("config/" + name + ".yaml")
 	if err != nil {
-		panic(fmt.Sprintf("Open config file fail: config/%s.yaml. Please run application as ./app [dev] ", environment))
+		panic(fmt.Sprintf("Open config file fail: config/%s.yaml. Please run application as ./app [dev] ", *e.Name))
 		return
 	}
 	err = yaml.Unmarshal(file, &config)
 	if err != nil {
-		panic(fmt.Sprintf("Parse config file fail: config/%s.yaml %s", environment, err.Error()))
+		panic(fmt.Sprintf("Parse config file fail: config/%s.yaml %s", *e.Name, err.Error()))
 		return
 	}
-	configData[environment] = config
+	configData[e.Name] = config
 }
 
 func parse(in interface{}, out interface{}) {
