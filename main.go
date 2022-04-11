@@ -19,7 +19,7 @@ var Local Environment
 var Global Environment
 
 type Environment struct {
-	Name string
+	Name *string
 }
 
 // [environment][setting][value]
@@ -29,9 +29,9 @@ var re *regexp.Regexp
 func init() {
 	configData = make(map[string]map[string]interface{})
 	re = regexp.MustCompile("^\\s*([\\w-]*)\\s*:\\s*(.*)\\s*")
-	Global.Name = "global"
+	*Global.Name = "global"
 	if len(os.Args) > 1 {
-		Local.Name = *Env
+		Local.Name = Env
 	} else {
 		panic("Please run app with environment -> ./app -env environment")
 	}
@@ -39,7 +39,7 @@ func init() {
 
 // GetEnv Return current environment, dev is default
 func GetEnv() string {
-	return Local.Name
+	return *Local.Name
 }
 
 // Get setting as string
@@ -107,11 +107,11 @@ func (e Environment) GetSlice(setting string) (result []string) {
 }
 
 func fetchenvironment(e Environment) map[string]interface{} {
-	environmentMap, ok := configData[e.Name]
+	environmentMap, ok := configData[*e.Name]
 	// singleton
 	if !ok {
-		importSettingsFromFile(e.Name)
-		environmentMap, _ = configData[e.Name]
+		importSettingsFromFile(*e.Name)
+		environmentMap, _ = configData[*e.Name]
 	}
 	return environmentMap
 }
