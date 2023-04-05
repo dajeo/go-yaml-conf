@@ -1,4 +1,4 @@
-module github.com/gusleein/go-yaml-conf
+module github.com/dajeo/go-yaml-conf
 
 go 1.17
 

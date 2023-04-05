@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	conf "github.com/gusleein/go-yaml-conf"
+	conf "github.com/dajeo/go-yaml-conf"
 )
 
 func main() {
