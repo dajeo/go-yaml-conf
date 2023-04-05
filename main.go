@@ -4,9 +4,8 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
-	"github.com/go-yaml/yaml"
+	"gopkg.in/yaml.v3"
 	"os"
-	"regexp"
 	"strconv"
 )
 
@@ -25,11 +24,9 @@ type Environment struct {
 
 // [environment][setting][value]
 var configData map[*string]map[string]interface{}
-var re *regexp.Regexp
 
 func init() {
 	configData = make(map[*string]map[string]interface{})
-	re = regexp.MustCompile("^\\s*([\\w-]*)\\s*:\\s*(.*)\\s*")
 	Global.Name = &global
 
 	if len(os.Args) > 1 {
